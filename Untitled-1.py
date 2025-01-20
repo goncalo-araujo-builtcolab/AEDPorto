@@ -119,6 +119,9 @@ if page == "Energy Consumers":
     st.plotly_chart(fig)
 
     # Create a line chart for rolling averages
+    fig_rolling = go.Figure()
+
+
     fig.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Self-consumption through grid (Code 418)'], mode='lines', name='Energy Consumption (kWh)'))
     fig.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Surplus Energy (Code 413)'], mode='lines', name='Surplus Energy (kWh)'))
     fig.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Energy Consumption (Code 423)'], mode='lines', name='Self-Consumption (kWh)'))
