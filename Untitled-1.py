@@ -71,7 +71,6 @@ def calculate_rolling_average(df, window):
     rolling_df = numeric_df.rolling(window=window).mean().dropna().reset_index()
     return rolling_df
 
-
 # Sidebar for navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Energy Consumers"])
@@ -95,11 +94,29 @@ if page == "Energy Consumers":
     
     freq = time_frame_mapping[time_frame]
     
-    # Calculate cumulative measurements
-    cumulative_df = calculate_cumulative(consumer_df, freq)
+    # Filter data based on selected time frame
+    end_date = consumer_df['Datetime'].max()
+    if time_frame == "30 min":
+        start_date = end_date - pd.Timedelta(minutes=30)
+    elif time_frame == "1 hour":
+        start_date = end_date - pd.Timedelta(hours=1)
+    elif time_frame == "1 day":
+        start_date = end_date - pd.Timedelta(days=1)
+    elif time_frame == "1 week":
+        start_date = end_date - pd.Timedelta(weeks=1)
+    elif time_frame == "1 month":
+        start_date = end_date - pd.Timedelta(days=30)
+    elif time_frame == "1 year":
+        start_date = end_date - pd.Timedelta(days=365)
     
-    # Calculate rolling averages
-    rolling_df = calculate_rolling_average(consumer_df, freq)
+    # Filter the consumer dataframe by the selected time period
+    filtered_df = consumer_df[consumer_df['Datetime'] >= start_date]
+    
+    # Calculate cumulative measurements for the filtered data
+    cumulative_df = calculate_cumulative(filtered_df, freq)
+    
+    # Calculate rolling averages for the filtered data
+    rolling_df = calculate_rolling_average(filtered_df, freq)
     
     # Create a bar chart for cumulative measurements
     fig_cumulative = go.Figure()
@@ -123,21 +140,23 @@ if page == "Energy Consumers":
     
     st.plotly_chart(fig_rolling)
     
-    # Add energy source breakdown chart (Donut chart)
+    # Energy Source Breakdown (Donut chart) based on the filtered data
     fig_pie = go.Figure(go.Pie(
         labels=["Self-consumption", "Grid Consumption", "Surplus Energy"],
-        values=[consumer_df['Self-consumption through grid (Code 418)'].sum(),
-                consumer_df['Energy Consumption (Code 423)'].sum() - consumer_df['Self-consumption through grid (Code 418)'].sum(),
-                consumer_df['Surplus Energy (Code 413)'].sum()],
+        values=[
+            filtered_df['Self-consumption through grid (Code 418)'].sum(),
+            filtered_df['Energy Consumption (Code 423)'].sum() - filtered_df['Self-consumption through grid (Code 418)'].sum(),
+            filtered_df['Surplus Energy (Code 413)'].sum()
+        ],
         hole=0.3
     ))
-    fig_pie.update_layout(title='Energy Source Breakdown (Self-consumed vs. Grid vs. Surplus)')
+    fig_pie.update_layout(title=f'Energy Source Breakdown ({time_frame})')
     st.plotly_chart(fig_pie)
     
     # Display additional KPIs for energy efficiency and savings
-    total_consumption = consumer_df['Energy Consumption (Code 423)'].sum()
-    total_self_consumed = consumer_df['Self-consumption through grid (Code 418)'].sum()
-    total_surplus = consumer_df['Surplus Energy (Code 413)'].sum()
+    total_consumption = filtered_df['Energy Consumption (Code 423)'].sum()
+    total_self_consumed = filtered_df['Self-consumption through grid (Code 418)'].sum()
+    total_surplus = filtered_df['Surplus Energy (Code 413)'].sum()
     
     self_consumption_rate = (total_self_consumed / total_consumption) * 100 if total_consumption else 0
     estimated_cost = total_consumption * 0.12  # Assuming $0.12 per kWh (this value can be adjusted)
@@ -146,7 +165,7 @@ if page == "Energy Consumers":
     st.metric("Self-consumption Rate", f"{self_consumption_rate:.2f}%")
     st.metric("Estimated Cost ($)", f"${estimated_cost:.2f}")
     
-    # Display efficiency line chart
+    # Display efficiency line chart for the selected timeframe
     fig_efficiency = go.Figure()
     
     fig_efficiency.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Self-consumption through grid (Code 418)'], mode='lines', name='Self-consumed Energy (kWh)', line=dict(color='green')))
@@ -155,6 +174,8 @@ if page == "Energy Consumers":
     fig_efficiency.update_layout(title='Energy Efficiency: Self-consumed vs. Total Consumption', xaxis_title='Datetime', yaxis_title='kWh')
     st.plotly_chart(fig_efficiency)
     
-    # Display raw data
-    st.write("Here is the data for energy consumers:")
-    st.dataframe(consumer_df)
+    # Display raw data for the selected time period
+    st.write(f"Here is the data for energy consumers for the last {time_frame}:")
+    st.dataframe(filtered_df)
+
+
