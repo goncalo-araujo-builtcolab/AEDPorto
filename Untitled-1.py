@@ -80,13 +80,13 @@ page = st.sidebar.radio("Go to", ["Energy Consumers"])
 if page == "Energy Consumers":
     st.title("Energy Consumers")
     
-    # Add buttons for time frame selection
+    # Add buttons for overall time frame selection (affects all charts)
     time_frame = st.radio(
         "Select Time Frame",
         ["Last Day", "Last Week", "Last Month", "Last Year", "Max"]
     )
     
-    # Determine the start date based on the selected timeframe
+    # Determine the start date based on the selected overall timeframe
     end_date = consumer_df['Datetime'].max()
     
     if time_frame == "Last Day":
@@ -120,16 +120,14 @@ if page == "Energy Consumers":
     
     st.plotly_chart(fig_cumulative)
     
-    # Create a line chart for rolling averages
-    fig_rolling = go.Figure()
+    # Create a line chart for energy efficiency (Self-consumed vs. Total Consumption)
+    fig_efficiency = go.Figure()
     
-    fig_rolling.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Energy Consumption (Code 423)'], mode='lines', name='Energy Consumption (kWh)'))
-    fig_rolling.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Surplus Energy (Code 413)'], mode='lines', name='Surplus Energy (kWh)'))
-    fig_rolling.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Self-consumption through grid (Code 418)'], mode='lines', name='Self-consumption through grid (kWh)'))
+    fig_efficiency.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Self-consumption through grid (Code 418)'], mode='lines', name='Self-consumed Energy (kWh)', line=dict(color='green')))
+    fig_efficiency.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Energy Consumption (Code 423)'], mode='lines', name='Total Energy Consumption (kWh)', line=dict(color='blue', dash='dash')))
     
-    fig_rolling.update_layout(title='Rolling Average Energy Metrics', xaxis_title='Datetime', yaxis_title='kWh')
-    
-    st.plotly_chart(fig_rolling)
+    fig_efficiency.update_layout(title='Energy Efficiency: Self-consumed vs. Total Consumption', xaxis_title='Datetime', yaxis_title='kWh')
+    st.plotly_chart(fig_efficiency)
     
     # Energy Source Breakdown (Donut chart) based on the filtered data
     fig_pie = go.Figure(go.Pie(
@@ -156,18 +154,42 @@ if page == "Energy Consumers":
     st.metric("Self-consumption Rate", f"{self_consumption_rate:.2f}%")
     st.metric("Estimated Cost (€)", f"${estimated_cost:.2f}")
     
-    # Display efficiency line chart for the selected timeframe
-    fig_efficiency = go.Figure()
+    # Buttons below the pie chart for changing the timeframe of the pie chart only
+    st.subheader("Adjust Timeframe for Pie Chart")
+
+    # Pie chart timeframe buttons
+    pie_time_frame = st.radio(
+        "Select Pie Chart Time Frame",
+        ["Last Day", "Last Week", "Last Month", "Last Year", "Max"]
+    )
     
-    fig_efficiency.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Self-consumption through grid (Code 418)'], mode='lines', name='Self-consumed Energy (kWh)', line=dict(color='green')))
-    fig_efficiency.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Energy Consumption (Code 423)'], mode='lines', name='Total Energy Consumption (kWh)', line=dict(color='blue', dash='dash')))
+    # Adjust the filtered dataframe for pie chart based on the selected timeframe
+    if pie_time_frame == "Last Day":
+        pie_start_date = end_date - pd.Timedelta(days=1)
+    elif pie_time_frame == "Last Week":
+        pie_start_date = end_date - pd.Timedelta(weeks=1)
+    elif pie_time_frame == "Last Month":
+        pie_start_date = end_date - pd.Timedelta(days=30)
+    elif pie_time_frame == "Last Year":
+        pie_start_date = end_date - pd.Timedelta(days=365)
+    elif pie_time_frame == "Max":
+        pie_start_date = consumer_df['Datetime'].min()
     
-    fig_efficiency.update_layout(title='Energy Efficiency: Self-consumed vs. Total Consumption', xaxis_title='Datetime', yaxis_title='kWh')
-    st.plotly_chart(fig_efficiency)
+    # Filter the data for the pie chart timeframe
+    pie_filtered_df = consumer_df[consumer_df['Datetime'] >= pie_start_date]
     
-    # Display raw data for the selected time period
-    st.write(f"Here is the data for energy consumers for the selected time period: {time_frame}")
-    st.dataframe(filtered_df)
+    # Create a pie chart with updated filtered data
+    fig_pie = go.Figure(go.Pie(
+        labels=["Self-consumption", "Grid Consumption", "Surplus Energy"],
+        values=[ 
+            pie_filtered_df['Self-consumption through grid (Code 418)'].sum(),
+            pie_filtered_df['Energy Consumption (Code 423)'].sum() - pie_filtered_df['Self-consumption through grid (Code 418)'].sum(),
+            pie_filtered_df['Surplus Energy (Code 413)'].sum()
+        ],
+        hole=0.3
+    ))
+    fig_pie.update_layout(title=f'Energy Source Breakdown ({pie_time_frame})')
+    st.plotly_chart(fig_pie)
 
 
 
