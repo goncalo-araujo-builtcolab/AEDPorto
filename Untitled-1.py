@@ -85,11 +85,10 @@ if page == "Energy Consumers":
     st.title("Energy Consumers")
     
     # Time frame selection
-    time_frame = st.selectbox("Select Time Frame", ["15 min", "30 min", "1 hour", "1 day", "1 week", "1 month", "1 year"])
+    time_frame = st.selectbox("Select Time Frame", [ "30 min", "1 hour", "1 day", "1 week", "1 month", "1 year"])
     
     # Map time frame to rolling window size
     time_frame_mapping = {
-        "15 min": '15T',
         "30 min": '30T',
         "1 hour": '1H',
         "1 day": '1D',
@@ -110,9 +109,9 @@ if page == "Energy Consumers":
     # Create a combined Plotly line chart
     fig = go.Figure()
     
-    fig.add_trace(go.Bar(x=cumulative_df['Datetime'], y=cumulative_df['Self-consumption through grid (Code 418)'], name='Energy Consumption (kWh)'))
-    fig.add_trace(go.Bar(x=cumulative_df['Datetime'], y=cumulative_df['Surplus Energy (Code 413)'], name='Surplus Energy (kWh)'))
-    fig.add_trace(go.Bar(x=cumulative_df['Datetime'], y=cumulative_df['Energy Consumption (Code 423)'], name='Self-Consumption (kWh)'))
+    fig.add_trace(go.Scatter(x=cumulative_df['Datetime'], y=cumulative_df['Self-consumption through grid (Code 418)'], mode='lines', name='Energy Consumption (kWh)'))
+    fig.add_trace(go.Scatter(x=cumulative_df['Datetime'], y=cumulative_df['Surplus Energy (Code 413)'], mode='lines', name='Surplus Energy (kWh)'))
+    fig.add_trace(go.Scatter(x=cumulative_df['Datetime'], y=cumulative_df['Energy Consumption (Code 423)'], mode='lines', name='Self-Consumption (kWh)'))
     
     fig.update_layout(title='Cumulative Energy Metrics', xaxis_title='Datetime', yaxis_title='kWh')
     
@@ -121,10 +120,9 @@ if page == "Energy Consumers":
     # Create a line chart for rolling averages
     fig_rolling = go.Figure()
 
-
-    fig.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Self-consumption through grid (Code 418)'], mode='lines', name='Energy Consumption (kWh)'))
+    fig.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Self-consumption through grid (Code 418)'], mode='lines', name='Self-Consumption (kWh)'))
     fig.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Surplus Energy (Code 413)'], mode='lines', name='Surplus Energy (kWh)'))
-    fig.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Energy Consumption (Code 423)'], mode='lines', name='Self-Consumption (kWh)'))
+    fig.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Energy Consumption (Code 423)'], mode='lines', name='Energy Consumption (kWh)'))
     
     fig_rolling.update_layout(title='Rolling Average Energy Metrics', xaxis_title='Datetime', yaxis_title='kWh')
     
@@ -134,6 +132,9 @@ if page == "Energy Consumers":
     st.write("Here is the data for energy consumers:")
     st.dataframe(consumer_df)
 
+
+
+# %%
 
 
 
