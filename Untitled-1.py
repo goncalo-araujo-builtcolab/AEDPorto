@@ -149,7 +149,8 @@ if page == "Energy Consumers":
     # Pie chart timeframe buttons
     pie_time_frame = st.radio(
         "Select Pie Chart Time Frame",
-        ["Last Day", "Last Week", "Last Month", "Last Year", "Max"]
+        ["Last Day", "Last Week", "Last Month", "Last Year", "Max"],
+        horizontal=True
     )
     
     # Adjust the filtered dataframe for pie chart based on the selected timeframe
