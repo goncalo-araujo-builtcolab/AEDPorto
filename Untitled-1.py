@@ -63,14 +63,15 @@ producer_df = producer_df.sort_values(by='Datetime')
 # Function to calculate cumulative measurements
 def calculate_cumulative(df, freq):
     df = df.set_index('Datetime')
-    cumulative_df = df.resample(freq).sum().cumsum().reset_index()
+    numeric_df = df.select_dtypes(include=[np.number])
+    cumulative_df = numeric_df.resample(freq).sum().cumsum().reset_index()
     return cumulative_df
 
 # Function to calculate rolling averages
 def calculate_rolling_average(df, window):
     df = df.set_index('Datetime')
     numeric_df = df.select_dtypes(include=[np.number])
-    rolling_df = numeric_df.rolling(window=window).mean().reset_index()
+    rolling_df = numeric_df.resample(window).mean().reset_index()
     return rolling_df
 
 # %%
@@ -109,9 +110,9 @@ if page == "Energy Consumers":
     # Create a combined Plotly line chart
     fig = go.Figure()
     
-    fig.add_trace(go.Scatter(x=cumulative_df['Datetime'], y=cumulative_df['Self-consumption through grid (Code 418)'], mode='lines', name='Energy Consumption (kWh)'))
-    fig.add_trace(go.Scatter(x=cumulative_df['Datetime'], y=cumulative_df['Surplus Energy (Code 413)'], mode='lines', name='Surplus Energy (kWh)'))
-    fig.add_trace(go.Scatter(x=cumulative_df['Datetime'], y=cumulative_df['Energy Consumption (Code 423)'], mode='lines', name='Self-Consumption (kWh)'))
+    fig.add_trace(go.Bar(x=cumulative_df['Datetime'], y=cumulative_df['Self-consumption through grid (Code 418)'], name='Energy Consumption (kWh)'))
+    fig.add_trace(go.Bar(x=cumulative_df['Datetime'], y=cumulative_df['Surplus Energy (Code 413)'], name='Surplus Energy (kWh)'))
+    fig.add_trace(go.Bar(x=cumulative_df['Datetime'], y=cumulative_df['Energy Consumption (Code 423)'], name='Self-Consumption (kWh)'))
     
     fig.update_layout(title='Cumulative Energy Metrics', xaxis_title='Datetime', yaxis_title='kWh')
     
