@@ -71,6 +71,7 @@ def calculate_rolling_average(df, window):
     rolling_df = numeric_df.rolling(window=window).mean().dropna().reset_index()
     return rolling_df
 
+
 # Sidebar for navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Energy Consumers"])
@@ -79,44 +80,34 @@ page = st.sidebar.radio("Go to", ["Energy Consumers"])
 if page == "Energy Consumers":
     st.title("Energy Consumers")
     
-    # Time frame selection
-    time_frame = st.selectbox("Select Time Frame", ["30 min", "1 hour", "1 day", "1 week", "1 month", "1 year"])
+    # Add buttons for time frame selection
+    time_frame = st.radio(
+        "Select Time Frame",
+        ["Last Day", "Last Week", "Last Month", "Last Year", "Max"]
+    )
     
-    # Map time frame to resample frequency and rolling window size
-    time_frame_mapping = {
-        "30 min": '30T',
-        "1 hour": '1H',
-        "1 day": '1D',
-        "1 week": '7D',
-        "1 month": '30D',
-        "1 year": '365D'
-    }
-    
-    freq = time_frame_mapping[time_frame]
-    
-    # Filter data based on selected time frame
+    # Determine the start date based on the selected timeframe
     end_date = consumer_df['Datetime'].max()
-    if time_frame == "30 min":
-        start_date = end_date - pd.Timedelta(minutes=30)
-    elif time_frame == "1 hour":
-        start_date = end_date - pd.Timedelta(hours=1)
-    elif time_frame == "1 day":
+    
+    if time_frame == "Last Day":
         start_date = end_date - pd.Timedelta(days=1)
-    elif time_frame == "1 week":
+    elif time_frame == "Last Week":
         start_date = end_date - pd.Timedelta(weeks=1)
-    elif time_frame == "1 month":
+    elif time_frame == "Last Month":
         start_date = end_date - pd.Timedelta(days=30)
-    elif time_frame == "1 year":
+    elif time_frame == "Last Year":
         start_date = end_date - pd.Timedelta(days=365)
+    elif time_frame == "Max":
+        start_date = consumer_df['Datetime'].min()
     
     # Filter the consumer dataframe by the selected time period
     filtered_df = consumer_df[consumer_df['Datetime'] >= start_date]
     
     # Calculate cumulative measurements for the filtered data
-    cumulative_df = calculate_cumulative(filtered_df, freq)
+    cumulative_df = calculate_cumulative(filtered_df, 'D')
     
     # Calculate rolling averages for the filtered data
-    rolling_df = calculate_rolling_average(filtered_df, freq)
+    rolling_df = calculate_rolling_average(filtered_df, 'D')
     
     # Create a bar chart for cumulative measurements
     fig_cumulative = go.Figure()
@@ -143,7 +134,7 @@ if page == "Energy Consumers":
     # Energy Source Breakdown (Donut chart) based on the filtered data
     fig_pie = go.Figure(go.Pie(
         labels=["Self-consumption", "Grid Consumption", "Surplus Energy"],
-        values=[
+        values=[ 
             filtered_df['Self-consumption through grid (Code 418)'].sum(),
             filtered_df['Energy Consumption (Code 423)'].sum() - filtered_df['Self-consumption through grid (Code 418)'].sum(),
             filtered_df['Surplus Energy (Code 413)'].sum()
@@ -159,11 +150,11 @@ if page == "Energy Consumers":
     total_surplus = filtered_df['Surplus Energy (Code 413)'].sum()
     
     self_consumption_rate = (total_self_consumed / total_consumption) * 100 if total_consumption else 0
-    estimated_cost = total_consumption * 0.12  # Assuming $0.12 per kWh (this value can be adjusted)
+    estimated_cost = total_consumption * 0.2  # Assuming €0.2 per kWh (this value can be adjusted)
     
     st.metric("Total Energy Consumption (kWh)", total_consumption)
     st.metric("Self-consumption Rate", f"{self_consumption_rate:.2f}%")
-    st.metric("Estimated Cost ($)", f"${estimated_cost:.2f}")
+    st.metric("Estimated Cost (€)", f"${estimated_cost:.2f}")
     
     # Display efficiency line chart for the selected timeframe
     fig_efficiency = go.Figure()
@@ -175,7 +166,8 @@ if page == "Energy Consumers":
     st.plotly_chart(fig_efficiency)
     
     # Display raw data for the selected time period
-    st.write(f"Here is the data for energy consumers for the last {time_frame}:")
+    st.write(f"Here is the data for energy consumers for the selected time period: {time_frame}")
     st.dataframe(filtered_df)
+
 
 
