@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 # %%
-file_path = r"C:\Users\gonca\OneDrive - BUILT COLAB\Ambiente de Trabalho\BUILT\AEDPorto\fullexcel.xlsx"
+file_path = r"fullexcel.xlsx"
 consumer_df = pd.read_excel(file_path, sheet_name="Consumer")  # Assuming tab-delimited
 producer_df = pd.read_excel(file_path, sheet_name='Producer')  # Assuming tab-delimited
 
