@@ -187,23 +187,10 @@ if page == "Energy Producers":
     st.plotly_chart(fig_efficiency_producer)
     
     # Display additional KPIs for energy production
-total_injected_energy = producer_filtered_df['Injected Energy per Energy Producer (Code 424)'].sum()
-total_surplus_energy = producer_filtered_df['Surplus Energy (Code 413)'].sum()
-
-energy_production_efficiency = (total_injected_energy / total_surplus_energy) * 100 if total_surplus_energy else 0
-
-st.metric("Total Injected Energy (kWh)", total_injected_energy)
-st.metric("Energy Production Efficiency", f"{energy_production_efficiency:.2f}%")
-
-# Pie chart for energy production breakdown
-producer_pie_fig = go.Figure(go.Pie(
-    labels=["Injected Energy", "Surplus Energy"],
-    values=[
-        producer_filtered_df['Injected Energy per Energy Producer (Code 424)'].sum(),
-        producer_filtered_df['Surplus Energy (Code 413)'].sum()
-    ],
-    hole=0.3
-))
-producer_pie_fig.update_layout(title=f'Energy Production Breakdown ({producer_time_frame})')
-st.plotly_chart(producer_pie_fig)
-
+    total_injected_energy = producer_filtered_df['Injected Energy per Energy Producer (Code 424)'].sum()
+    total_surplus_energy = producer_filtered_df['Surplus Energy (Code 413)'].sum()
+    
+    energy_production_efficiency = (total_injected_energy / total_surplus_energy) * 100 if total_surplus_energy else 0
+    
+    st.metric("Total Injected Energy (kWh)", total_injected_energy)
+    st.metric("Energy Production Efficiency", f"{energy_production_efficiency:.2f}%")
