@@ -121,7 +121,7 @@ if page == "Energy Consumers":
     self_consumption_rate = (total_self_consumed / total_consumption) * 100 if total_consumption else 0
     estimated_cost = total_consumption * 0.2  # Assuming €0.2 per kWh (this value can be adjusted)
     
-    st.metric("Total Energy Consumption (kWh)", total_consumption)
+    st.metric("Total Energy Consumption (kWh)", f"{total_consumption:.2f}")
     st.metric("Self-consumption Rate", f"{self_consumption_rate:.2f}%")
     st.metric("Estimated Cost (€)", f"€{estimated_cost:.2f}")
     
@@ -192,5 +192,17 @@ if page == "Energy Producers":
     
     energy_production_efficiency = (total_injected_energy / total_surplus_energy) * 100 if total_surplus_energy else 0
     
-    st.metric("Total Injected Energy (kWh)", total_injected_energy)
+    st.metric("Total Injected Energy (kWh)", f"{total_injected_energy:.2f}")
     st.metric("Energy Production Efficiency", f"{energy_production_efficiency:.2f}%")
+    
+    # Pie chart for energy source breakdown
+    fig_pie_producer = go.Figure(go.Pie(
+        labels=["Injected Energy", "Surplus Energy"],
+        values=[ 
+            producer_filtered_df['Injected Energy per Energy Producer (Code 424)'].sum(),
+            producer_filtered_df['Surplus Energy (Code 413)'].sum()
+        ],
+        hole=0.3
+    ))
+    fig_pie_producer.update_layout(title=f'Energy Source Breakdown ({producer_time_frame})')
+    st.plotly_chart(fig_pie_producer)
