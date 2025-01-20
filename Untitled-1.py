@@ -129,18 +129,7 @@ if page == "Energy Consumers":
     fig_efficiency.update_layout(title='Energy Efficiency: Self-consumed vs. Total Consumption', xaxis_title='Datetime', yaxis_title='kWh')
     st.plotly_chart(fig_efficiency)
     
-    # Energy Source Breakdown (Donut chart) based on the filtered data
-    fig_pie = go.Figure(go.Pie(
-        labels=["Self-consumption", "Grid Consumption", "Surplus Energy"],
-        values=[ 
-            filtered_df['Self-consumption through grid (Code 418)'].sum(),
-            filtered_df['Energy Consumption (Code 423)'].sum() - filtered_df['Self-consumption through grid (Code 418)'].sum(),
-            filtered_df['Surplus Energy (Code 413)'].sum()
-        ],
-        hole=0.3
-    ))
-    fig_pie.update_layout(title=f'Energy Source Breakdown ({time_frame})')
-    st.plotly_chart(fig_pie)
+   
     
     # Display additional KPIs for energy efficiency and savings
     total_consumption = filtered_df['Energy Consumption (Code 423)'].sum()
