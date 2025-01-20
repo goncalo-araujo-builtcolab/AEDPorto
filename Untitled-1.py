@@ -71,10 +71,10 @@ def calculate_rolling_average(df, window):
     rolling_df = numeric_df.rolling(window=window).mean().dropna().reset_index()
     return rolling_df
 
-# %%
+
 # Sidebar for navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Energy Consumers", "Energy Producers"])
+page = st.sidebar.radio("Go to", ["Energy Consumers"])
 
 # Page: Energy Consumers
 if page == "Energy Consumers":
@@ -123,12 +123,38 @@ if page == "Energy Consumers":
     
     st.plotly_chart(fig_rolling)
     
-    # Display data
+    # Add energy source breakdown chart (Donut chart)
+    fig_pie = go.Figure(go.Pie(
+        labels=["Self-consumption", "Grid Consumption", "Surplus Energy"],
+        values=[consumer_df['Self-consumption through grid (Code 418)'].sum(),
+                consumer_df['Energy Consumption (Code 423)'].sum() - consumer_df['Self-consumption through grid (Code 418)'].sum(),
+                consumer_df['Surplus Energy (Code 413)'].sum()],
+        hole=0.3
+    ))
+    fig_pie.update_layout(title='Energy Source Breakdown (Self-consumed vs. Grid vs. Surplus)')
+    st.plotly_chart(fig_pie)
+    
+    # Display additional KPIs for energy efficiency and savings
+    total_consumption = consumer_df['Energy Consumption (Code 423)'].sum()
+    total_self_consumed = consumer_df['Self-consumption through grid (Code 418)'].sum()
+    total_surplus = consumer_df['Surplus Energy (Code 413)'].sum()
+    
+    self_consumption_rate = (total_self_consumed / total_consumption) * 100 if total_consumption else 0
+    estimated_cost = total_consumption * 0.12  # Assuming $0.12 per kWh (this value can be adjusted)
+    
+    st.metric("Total Energy Consumption (kWh)", total_consumption)
+    st.metric("Self-consumption Rate", f"{self_consumption_rate:.2f}%")
+    st.metric("Estimated Cost ($)", f"${estimated_cost:.2f}")
+    
+    # Display efficiency line chart
+    fig_efficiency = go.Figure()
+    
+    fig_efficiency.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Self-consumption through grid (Code 418)'], mode='lines', name='Self-consumed Energy (kWh)', line=dict(color='green')))
+    fig_efficiency.add_trace(go.Scatter(x=rolling_df['Datetime'], y=rolling_df['Energy Consumption (Code 423)'], mode='lines', name='Total Energy Consumption (kWh)', line=dict(color='blue', dash='dash')))
+    
+    fig_efficiency.update_layout(title='Energy Efficiency: Self-consumed vs. Total Consumption', xaxis_title='Datetime', yaxis_title='kWh')
+    st.plotly_chart(fig_efficiency)
+    
+    # Display raw data
     st.write("Here is the data for energy consumers:")
     st.dataframe(consumer_df)
-
-# Page: Energy Producers (Placeholder)
-elif page == "Energy Producers":
-    st.title("Energy Producers")
-    st.write("Here is the data for energy producers:")
-    # Add producer data and KPIs here
