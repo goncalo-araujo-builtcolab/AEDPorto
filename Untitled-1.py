@@ -125,7 +125,6 @@ if page == "Energy Consumers":
     st.metric("Estimated Cost (€)", f"€{estimated_cost:.2f}")
     
     # Pie chart for energy source breakdown
-    st.subheader("Energy Source Breakdown (Pie Chart)")
     fig_pie = go.Figure(go.Pie(
         labels=["Self-consumption", "Grid Consumption", "Surplus Energy"],
         values=[ 
