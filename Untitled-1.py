@@ -85,19 +85,19 @@ if page == "Energy Producers":
     fig_breakdown = go.Figure()
     fig_breakdown.add_trace(go.Bar(
         x=producer_cumulative_df['Datetime'], 
-        y=producer_cumulative_df['Injected Energy per Energy Producer (Code 424)'].round(2), 
+        y=producer_cumulative_df['Injected Energy per Energy Producer (Code 424)'], 
         name='Injected Energy (kWh)', 
         marker_color='blue'
     ))
     fig_breakdown.add_trace(go.Bar(
         x=producer_cumulative_df['Datetime'], 
-        y=producer_cumulative_df['Surplus Energy (Code 413)'].round(2), 
+        y=producer_cumulative_df['Surplus Energy (Code 413)'], 
         name='Surplus Energy (kWh)', 
         marker_color='orange'
     ))
     fig_breakdown.add_trace(go.Bar(
         x=producer_cumulative_df['Datetime'], 
-        y=producer_cumulative_df['Imputed Energy (Code 415)'].round(2), 
+        y=producer_cumulative_df['Imputed Energy (Code 415)'], 
         name='Imputed Energy (kWh)', 
         marker_color='green'
     ))
@@ -110,15 +110,15 @@ if page == "Energy Producers":
     st.plotly_chart(fig_breakdown)
 
     # Calculate additional KPIs
-    total_injected_energy = producer_filtered_df['Injected Energy per Energy Producer (Code 424)'].sum().round(2)
-    total_surplus_energy = producer_filtered_df['Surplus Energy (Code 413)'].sum().round(2)
-    total_imputed_energy = producer_filtered_df['Imputed Energy (Code 415)'].sum().round(2)
-    total_energy_production = (total_injected_energy + total_surplus_energy + total_imputed_energy).round(2)
+    total_injected_energy = producer_filtered_df['Injected Energy per Energy Producer (Code 424)'].sum()
+    total_surplus_energy = producer_filtered_df['Surplus Energy (Code 413)'].sum()
+    total_imputed_energy = producer_filtered_df['Imputed Energy (Code 415)'].sum()
+    total_energy_production = total_injected_energy + total_surplus_energy + total_imputed_energy
 
-    energy_production_efficiency = ((total_injected_energy / total_energy_production) * 100).round(2) if total_energy_production else 0
+    energy_production_efficiency = (total_injected_energy / total_energy_production) * 100 if total_energy_production else 0
 
     # Display KPIs
-    st.metric("Total Injected Energy (kWh)", f"{total_injected_energy:.2f}")
+    st.metric("Total Injected Energy (kWh)", f"{total_injected_energy.round:.2f}")
     st.metric("Total Surplus Energy (kWh)", f"{total_surplus_energy:.2f}")
     st.metric("Total Imputed Energy (kWh)", f"{total_imputed_energy:.2f}")
     st.metric("Energy Production Efficiency", f"{energy_production_efficiency:.2f}%")
