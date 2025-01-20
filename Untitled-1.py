@@ -120,7 +120,6 @@ if page == "Energy Consumers":
 
 
 # %%
-! streamlit run Untitled-1.py N
 
 # %%
 
