@@ -1,8 +1,6 @@
 # %%
 import pandas as pd
 import numpy as np  
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -122,7 +120,7 @@ if page == "Energy Consumers":
 
 
 # %%
-
+! streamlit run Untitled-1.py N
 
 # %%
 
