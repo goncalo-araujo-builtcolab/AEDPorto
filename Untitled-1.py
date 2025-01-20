@@ -141,7 +141,7 @@ if page == "Energy Consumers":
     
     st.metric("Total Energy Consumption (kWh)", total_consumption)
     st.metric("Self-consumption Rate", f"{self_consumption_rate:.2f}%")
-    st.metric("Estimated Cost (€)", f"${estimated_cost:.2f}")
+    st.metric("Estimated Cost (€)", f"€{estimated_cost:.2f}")
     
     # Buttons below the pie chart for changing the timeframe of the pie chart only
     st.subheader("Adjust Timeframe for Pie Chart")
